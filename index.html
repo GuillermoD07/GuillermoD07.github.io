@@ -229,7 +229,11 @@
       color: #232f3e;
       margin-top: 20px;
     }
+<<<<<<< HEAD
     /* Estilos para el control de cantidad */
+=======
+    /* Nuevos estilos para el control de cantidad */
+>>>>>>> 8a9eb0cb93103698d82f0aa69217a8d8b476da70
     .quantity-control {
       display: flex;
       align-items: center;
@@ -258,6 +262,7 @@
       align-items: center;
       gap: 10px;
     }
+<<<<<<< HEAD
     /* Estilos para el sistema de valoración */
     .rating {
       color: #ffc107;
@@ -422,6 +427,8 @@
         justify-content: space-between;
       }
     }
+=======
+>>>>>>> 8a9eb0cb93103698d82f0aa69217a8d8b476da70
   </style>
 </head>
 <body>
@@ -504,6 +511,7 @@
 <script>
   // Datos de productos ampliados
   const productos = [
+<<<<<<< HEAD
     { 
       id: 0,
       nombre: "Smartphone Avanzado", 
@@ -646,11 +654,20 @@
       ],
       relacionados: [1, 2]
     }
+=======
+    { nombre: "Producto 0", precio: 19.99, imagen: "imagenes/producto0.jpg" },
+    { nombre: "Producto 1", precio: 19.99, imagen: "https://via.placeholder.com/200x150" },
+    { nombre: "Producto 2", precio: 29.99, imagen: "https://via.placeholder.com/200x150" },
+    { nombre: "Producto 3", precio: 15.50, imagen: "https://via.placeholder.com/200x150" }
+>>>>>>> 8a9eb0cb93103698d82f0aa69217a8d8b476da70
   ];
 
   let cart = JSON.parse(localStorage.getItem('cart')) || [];
   let groupedCart = {};
+<<<<<<< HEAD
   let currentRating = 0;
+=======
+>>>>>>> 8a9eb0cb93103698d82f0aa69217a8d8b476da70
 
   function formatPhone() {
     let input = document.getElementById("telefono");
@@ -861,6 +878,7 @@
   }
 
   function vaciarCarrito() {
+<<<<<<< HEAD
     const cartItems = document.getElementById('cart-items');
     cartItems.style.transition = 'all 0.3s';
     cartItems.style.opacity = '0';
@@ -873,6 +891,11 @@
       cartItems.style.opacity = '1';
       cartItems.style.transform = 'translateX(0)';
     }, 300);
+=======
+    cart = [];
+    updateCart();
+    saveCart();
+>>>>>>> 8a9eb0cb93103698d82f0aa69217a8d8b476da70
   }
 
   function saveCart() {
@@ -906,6 +929,7 @@
     });
   }
 
+<<<<<<< HEAD
   // Función para abrir el modal de producto
   function openProductModal(productId) {
     const producto = productos.find(p => p.id === productId);
@@ -1068,11 +1092,14 @@
     currentRating = 0;
   }
 
+=======
+>>>>>>> 8a9eb0cb93103698d82f0aa69217a8d8b476da70
   // Inicializar la tienda al cargar la página
   document.addEventListener('DOMContentLoaded', function() {
     renderizarProductos();
     updateCart();
   });
+<<<<<<< HEAD
 
   // Cerrar modal al hacer clic fuera del contenido
   window.onclick = function(event) {
@@ -1081,6 +1108,8 @@
       closeModal();
     }
   }
+=======
+>>>>>>> 8a9eb0cb93103698d82f0aa69217a8d8b476da70
 </script>
 
 </body>
