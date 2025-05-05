@@ -141,11 +141,21 @@
       padding: 1em;
       border-radius: 8px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+    }
+    .product:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
     .product img {
       width: 100%;
       height: 150px;
       object-fit: contain;
+      transition: transform 0.3s;
+    }
+    .product:hover img {
+      transform: scale(1.05);
     }
     .product h3 {
       font-size: 1.1em;
@@ -219,7 +229,7 @@
       color: #232f3e;
       margin-top: 20px;
     }
-    /* Nuevos estilos para el control de cantidad */
+    /* Estilos para el control de cantidad */
     .quantity-control {
       display: flex;
       align-items: center;
@@ -247,6 +257,170 @@
       display: flex;
       align-items: center;
       gap: 10px;
+    }
+    /* Estilos para el sistema de valoración */
+    .rating {
+      color: #ffc107;
+      margin: 5px 0;
+      font-size: 0.9em;
+    }
+    .rating-value {
+      color: #6c757d;
+      font-size: 0.8em;
+    }
+    .star {
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .star:hover {
+      color: #ffc107;
+    }
+    /* Estilos para el modal de producto */
+    .product-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.8);
+      z-index: 10001;
+      overflow-y: auto;
+    }
+    .modal-content {
+      background-color: white;
+      margin: 2% auto;
+      padding: 20px;
+      border-radius: 8px;
+      width: 80%;
+      max-width: 800px;
+      position: relative;
+    }
+    .close-modal {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 24px;
+      cursor: pointer;
+    }
+    .product-details {
+      display: flex;
+      gap: 20px;
+    }
+    .product-gallery {
+      flex: 1;
+    }
+    .product-gallery img {
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    .thumbnail-container {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .thumbnail {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+    .thumbnail.active {
+      border-color: #007bff;
+    }
+    .product-info {
+      flex: 1;
+    }
+    /* Estilos para el sistema de reseñas */
+    .review-form {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+    .review-item {
+      margin-bottom: 15px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #eee;
+    }
+    .review-author {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .review-date {
+      color: #666;
+      font-size: 0.8em;
+    }
+    .review-text {
+      margin-top: 5px;
+    }
+    /* Estilos para preguntas y respuestas */
+    .qa-section {
+      margin-top: 20px;
+    }
+    .qa-item {
+      margin-bottom: 15px;
+      padding: 10px;
+      background-color: #f9f9f9;
+      border-radius: 5px;
+    }
+    .qa-question {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .qa-answer {
+      margin-left: 15px;
+      color: #555;
+    }
+    /* Estilos para productos relacionados */
+    .related-products {
+      margin-top: 30px;
+    }
+    .related-products h3 {
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+    .related-products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+    .related-product {
+      cursor: pointer;
+      text-align: center;
+    }
+    .related-product img {
+      width: 100%;
+      height: 100px;
+      object-fit: contain;
+    }
+    /* Estilos responsive */
+    @media (max-width: 768px) {
+      .product-details {
+        flex-direction: column;
+      }
+      .modal-content {
+        width: 95%;
+        margin: 10px auto;
+      }
+      .products {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      }
+      .product h3 {
+        font-size: 1em;
+      }
+      .cart-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .item-actions {
+        margin-top: 10px;
+        width: 100%;
+        justify-content: space-between;
+      }
     }
   </style>
 </head>
@@ -319,16 +493,164 @@
   </section>
 </div>
 
+<!-- Modal de producto -->
+<div id="productModal" class="product-modal">
+  <div class="modal-content">
+    <span class="close-modal" onclick="closeModal()">&times;</span>
+    <div id="modalProductContent"></div>
+  </div>
+</div>
+
 <script>
+  // Datos de productos ampliados
   const productos = [
-    { nombre: "Producto 0", precio: 19.99, imagen: "imagenes/producto0.jpg" },
-    { nombre: "Producto 1", precio: 19.99, imagen: "https://via.placeholder.com/200x150" },
-    { nombre: "Producto 2", precio: 29.99, imagen: "https://via.placeholder.com/200x150" },
-    { nombre: "Producto 3", precio: 15.50, imagen: "https://via.placeholder.com/200x150" }
+    { 
+      id: 0,
+      nombre: "Smartphone Avanzado", 
+      precio: 599.99, 
+      imagenes: [
+        "https://via.placeholder.com/600x400?text=Smartphone+1",
+        "https://via.placeholder.com/600x400?text=Smartphone+2",
+        "https://via.placeholder.com/600x400?text=Smartphone+3"
+      ],
+      descripcion: "El último smartphone con pantalla OLED de 6.5 pulgadas, cámara triple de 48MP y batería de 5000mAh. Perfecto para fotografía profesional y uso intensivo.",
+      especificaciones: [
+        "Pantalla: 6.5\" OLED 1080x2400",
+        "Procesador: Octa-core 2.8GHz",
+        "RAM: 8GB",
+        "Almacenamiento: 128GB",
+        "Cámaras: 48MP + 12MP + 5MP",
+        "Batería: 5000mAh"
+      ],
+      rating: 4.5,
+      reviews: 36,
+      reseñas: [
+        {
+          autor: "Juan Pérez",
+          fecha: "2023-05-15",
+          rating: 5,
+          comentario: "Excelente teléfono, la batería dura todo el día y las fotos son increíbles."
+        },
+        {
+          autor: "María González",
+          fecha: "2023-04-22",
+          rating: 4,
+          comentario: "Muy buen dispositivo, aunque un poco grande para mi gusto."
+        }
+      ],
+      preguntas: [
+        {
+          pregunta: "¿Tiene carga inalámbrica?",
+          respuesta: "Sí, incluye carga inalámbrica Qi de 15W."
+        },
+        {
+          pregunta: "¿Es resistente al agua?",
+          respuesta: "Tiene certificación IP68, lo que significa que es resistente al polvo y puede sumergirse hasta 1.5 metros por 30 minutos."
+        }
+      ],
+      relacionados: [1, 2]
+    },
+    { 
+      id: 1,
+      nombre: "Laptop Ultradelgada", 
+      precio: 899.99, 
+      imagenes: [
+        "https://via.placeholder.com/600x400?text=Laptop+1",
+        "https://via.placeholder.com/600x400?text=Laptop+2"
+      ],
+      descripcion: "Laptop ultradelgada de 14 pulgadas con procesador de última generación, ideal para trabajo y entretenimiento.",
+      especificaciones: [
+        "Pantalla: 14\" FHD IPS",
+        "Procesador: Intel Core i7",
+        "RAM: 16GB",
+        "Almacenamiento: 512GB SSD",
+        "Peso: 1.2kg",
+        "Batería: Hasta 10 horas"
+      ],
+      rating: 4.2,
+      reviews: 28,
+      reseñas: [
+        {
+          autor: "Carlos Rojas",
+          fecha: "2023-06-10",
+          rating: 5,
+          comentario: "Increíblemente ligera y potente. Perfecta para viajes."
+        }
+      ],
+      preguntas: [
+        {
+          pregunta: "¿Incluye Windows?",
+          respuesta: "Sí, incluye Windows 11 Pro preinstalado."
+        }
+      ],
+      relacionados: [0, 3]
+    },
+    { 
+      id: 2,
+      nombre: "Auriculares Inalámbricos", 
+      precio: 129.99, 
+      imagenes: [
+        "https://via.placeholder.com/600x400?text=Auriculares+1",
+        "https://via.placeholder.com/600x400?text=Auriculares+2",
+        "https://via.placeholder.com/600x400?text=Auriculares+3"
+      ],
+      descripcion: "Auriculares con cancelación de ruido y sonido envolvente para una experiencia auditiva premium.",
+      especificaciones: [
+        "Tecnología: Bluetooth 5.0",
+        "Batería: 30 horas",
+        "Cancelación de ruido: Sí",
+        "Resistencia al agua: IPX4",
+        "Peso: 250g"
+      ],
+      rating: 4.8,
+      reviews: 42,
+      reseñas: [],
+      preguntas: [
+        {
+          pregunta: "¿Se pueden usar con cable?",
+          respuesta: "Sí, incluyen cable auxiliar para cuando se agota la batería."
+        }
+      ],
+      relacionados: [0, 3]
+    },
+    { 
+      id: 3,
+      nombre: "Smartwatch Deportivo", 
+      precio: 199.99, 
+      imagenes: [
+        "https://via.placeholder.com/600x400?text=Smartwatch+1",
+        "https://via.placeholder.com/600x400?text=Smartwatch+2"
+      ],
+      descripcion: "Reloj inteligente con monitor de ritmo cardíaco, GPS integrado y resistencia al agua para deportistas.",
+      especificaciones: [
+        "Pantalla: 1.4\" AMOLED",
+        "Batería: 7 días",
+        "Resistencia al agua: 5ATM",
+        "Sensores: Ritmo cardíaco, GPS, acelerómetro"
+      ],
+      rating: 4.0,
+      reviews: 15,
+      reseñas: [
+        {
+          autor: "Ana Martínez",
+          fecha: "2023-07-05",
+          rating: 4,
+          comentario: "Muy preciso para entrenamientos, la batería podría durar más."
+        }
+      ],
+      preguntas: [
+        {
+          pregunta: "¿Es compatible con iPhone?",
+          respuesta: "Sí, es compatible tanto con Android como con iOS."
+        }
+      ],
+      relacionados: [1, 2]
+    }
   ];
 
   let cart = JSON.parse(localStorage.getItem('cart')) || [];
   let groupedCart = {};
+  let currentRating = 0;
 
   function formatPhone() {
     let input = document.getElementById("telefono");
@@ -373,23 +695,77 @@
   function renderizarProductos() {
     const lista = document.getElementById('product-list');
     lista.innerHTML = '';
-    productos.forEach((producto, index) => {
+    productos.forEach((producto) => {
       const div = document.createElement('div');
       div.className = 'product';
+      div.style.cursor = 'pointer';
+      div.onclick = () => openProductModal(producto.id);
+      
+      const stars = generateStars(producto.rating);
+      
       div.innerHTML = `
-        <img src="${producto.imagen}" alt="${producto.nombre}">
+        <img src="${producto.imagenes[0]}" alt="${producto.nombre}">
         <h3>${producto.nombre}</h3>
+        <div class="rating">
+          ${stars}
+          <span class="rating-value">(${producto.rating.toFixed(1)}) ${producto.reviews} reseñas</span>
+        </div>
         <p>$${producto.precio.toFixed(2)}</p>
-        <button onclick="addToCart('${producto.nombre}', ${producto.precio})">Añadir al carrito</button>
+        <button onclick="event.stopPropagation(); addToCart('${producto.nombre}', ${producto.precio})">Añadir al carrito</button>
       `;
       lista.appendChild(div);
     });
+  }
+
+  // Función para generar las estrellas de valoración
+  function generateStars(rating) {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    let starsHTML = '';
+    
+    // Estrellas llenas
+    for (let i = 0; i < fullStars; i++) {
+      starsHTML += '★';
+    }
+    
+    // Media estrella
+    if (hasHalfStar) {
+      starsHTML += '½';
+    }
+    
+    // Estrellas vacías
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+    for (let i = 0; i < emptyStars; i++) {
+      starsHTML += '☆';
+    }
+    
+    return starsHTML;
   }
 
   function addToCart(nombre, precio) {
     cart.push({ nombre, precio });
     updateCart();
     saveCart();
+    
+    // Notificación
+    const notification = document.createElement('div');
+    notification.style.position = 'fixed';
+    notification.style.bottom = '20px';
+    notification.style.right = '20px';
+    notification.style.backgroundColor = '#28a745';
+    notification.style.color = 'white';
+    notification.style.padding = '10px 20px';
+    notification.style.borderRadius = '5px';
+    notification.style.zIndex = '10000';
+    notification.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+    notification.textContent = `¡${nombre} añadido al carrito!`;
+    
+    document.body.appendChild(notification);
+    setTimeout(() => {
+      notification.style.transition = 'opacity 0.5s';
+      notification.style.opacity = '0';
+      setTimeout(() => notification.remove(), 500);
+    }, 2000);
   }
 
   function updateCart() {
@@ -485,9 +861,18 @@
   }
 
   function vaciarCarrito() {
-    cart = [];
-    updateCart();
-    saveCart();
+    const cartItems = document.getElementById('cart-items');
+    cartItems.style.transition = 'all 0.3s';
+    cartItems.style.opacity = '0';
+    cartItems.style.transform = 'translateX(100px)';
+    
+    setTimeout(() => {
+      cart = [];
+      updateCart();
+      saveCart();
+      cartItems.style.opacity = '1';
+      cartItems.style.transform = 'translateX(0)';
+    }, 300);
   }
 
   function saveCart() {
@@ -502,14 +887,185 @@
     productosFiltrados.forEach((producto, index) => {
       const div = document.createElement('div');
       div.className = 'product';
+      div.style.cursor = 'pointer';
+      div.onclick = () => openProductModal(producto.id);
+      
+      const stars = generateStars(producto.rating);
+      
       div.innerHTML = `
-        <img src="${producto.imagen}" alt="${producto.nombre}">
+        <img src="${producto.imagenes[0]}" alt="${producto.nombre}">
         <h3>${producto.nombre}</h3>
+        <div class="rating">
+          ${stars}
+          <span class="rating-value">(${producto.rating.toFixed(1)}) ${producto.reviews} reseñas</span>
+        </div>
         <p>$${producto.precio.toFixed(2)}</p>
-        <button onclick="addToCart('${producto.nombre}', ${producto.precio})">Añadir al carrito</button>
+        <button onclick="event.stopPropagation(); addToCart('${producto.nombre}', ${producto.precio})">Añadir al carrito</button>
       `;
       lista.appendChild(div);
     });
+  }
+
+  // Función para abrir el modal de producto
+  function openProductModal(productId) {
+    const producto = productos.find(p => p.id === productId);
+    if (!producto) return;
+    
+    const modalContent = document.getElementById('modalProductContent');
+    modalContent.innerHTML = `
+      <div class="product-details">
+        <div class="product-gallery">
+          <img id="mainProductImage" src="${producto.imagenes[0]}" alt="${producto.nombre}">
+          <div class="thumbnail-container">
+            ${producto.imagenes.map((img, index) => `
+              <img class="thumbnail ${index === 0 ? 'active' : ''}" 
+                   src="${img}" 
+                   alt="Miniatura ${index + 1}"
+                   onclick="changeMainImage('${img}', this)">
+            `).join('')}
+          </div>
+        </div>
+        <div class="product-info">
+          <h2>${producto.nombre}</h2>
+          <div class="rating">
+            ${generateStars(producto.rating)}
+            <span class="rating-value">(${producto.rating.toFixed(1)}) ${producto.reviews} reseñas</span>
+          </div>
+          <p style="font-size: 24px; font-weight: bold; color: #b12704;">$${producto.precio.toFixed(2)}</p>
+          
+          <h3>Descripción</h3>
+          <p>${producto.descripcion}</p>
+          
+          <h3>Especificaciones</h3>
+          <ul>
+            ${producto.especificaciones.map(spec => `<li>${spec}</li>`).join('')}
+          </ul>
+          
+          <button onclick="addToCart('${producto.nombre}', ${producto.precio})" 
+                  style="background-color: #ffa41c; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin-top: 20px;">
+            Añadir al carrito
+          </button>
+        </div>
+      </div>
+      
+      <div class="reviews-section">
+        <h3>Reseñas (${producto.reseñas.length})</h3>
+        
+        ${producto.reseñas.length > 0 ? 
+          producto.reseñas.map(review => `
+            <div class="review-item">
+              <div class="review-author">${review.autor}</div>
+              <div class="rating">
+                ${generateStars(review.rating)}
+                <span class="review-date">${review.fecha}</span>
+              </div>
+              <div class="review-text">${review.comentario}</div>
+            </div>
+          `).join('') : 
+          '<p>No hay reseñas todavía. ¡Sé el primero en opinar!</p>'
+        }
+        
+        <div class="review-form">
+          <h4>Deja tu reseña</h4>
+          <div style="margin-bottom: 10px;">
+            <span class="rating" id="ratingStars">
+              <span class="star" onclick="setRating(1, this)">☆</span>
+              <span class="star" onclick="setRating(2, this)">☆</span>
+              <span class="star" onclick="setRating(3, this)">☆</span>
+              <span class="star" onclick="setRating(4, this)">☆</span>
+              <span class="star" onclick="setRating(5, this)">☆</span>
+            </span>
+          </div>
+          <textarea id="reviewText" style="width: 100%; padding: 10px; margin-bottom: 10px;" placeholder="Escribe tu reseña..."></textarea>
+          <button onclick="submitReview(${producto.id})" style="background-color: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">
+            Enviar reseña
+          </button>
+        </div>
+      </div>
+      
+      ${producto.preguntas && producto.preguntas.length > 0 ? `
+      <div class="qa-section">
+        <h3>Preguntas frecuentes</h3>
+        ${producto.preguntas.map(qa => `
+          <div class="qa-item">
+            <div class="qa-question">${qa.pregunta}</div>
+            <div class="qa-answer">${qa.respuesta}</div>
+          </div>
+        `).join('')}
+      </div>
+      ` : ''}
+      
+      ${producto.relacionados && producto.relacionados.length > 0 ? `
+      <div class="related-products">
+        <h3>Productos relacionados</h3>
+        <div class="related-products-grid">
+          ${producto.relacionados.map(id => {
+            const related = productos.find(p => p.id === id);
+            if (!related) return '';
+            return `
+              <div class="related-product" onclick="openProductModal(${related.id})">
+                <img src="${related.imagenes[0]}" alt="${related.nombre}">
+                <div>${related.nombre}</div>
+                <div class="rating">
+                  ${generateStars(related.rating)}
+                </div>
+                <div>$${related.precio.toFixed(2)}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+      ` : ''}
+    `;
+    
+    document.getElementById('productModal').style.display = 'block';
+    currentRating = 0;
+  }
+
+  function closeModal() {
+    document.getElementById('productModal').style.display = 'none';
+  }
+
+  function changeMainImage(src, element) {
+    document.getElementById('mainProductImage').src = src;
+    document.querySelectorAll('.thumbnail').forEach(thumb => {
+      thumb.classList.remove('active');
+    });
+    element.classList.add('active');
+  }
+
+  // Función para establecer la valoración
+  function setRating(rating, element) {
+    currentRating = rating;
+    const stars = element.parentElement.querySelectorAll('.star');
+    stars.forEach((star, index) => {
+      star.textContent = index < rating ? '★' : '☆';
+    });
+  }
+
+  // Función para enviar reseña (simulada)
+  function submitReview(productId) {
+    const reviewText = document.getElementById('reviewText').value;
+    if (!reviewText) {
+      alert('Por favor escribe tu reseña');
+      return;
+    }
+    
+    if (currentRating === 0) {
+      alert('Por favor selecciona una valoración');
+      return;
+    }
+    
+    // En una aplicación real, aquí enviarías los datos al servidor
+    alert('¡Gracias por tu reseña! (Esta es una simulación)');
+    document.getElementById('reviewText').value = '';
+    
+    // Resetear estrellas
+    const stars = document.querySelectorAll('#ratingStars .star');
+    stars.forEach(star => {
+      star.textContent = '☆';
+    });
+    currentRating = 0;
   }
 
   // Inicializar la tienda al cargar la página
@@ -517,6 +1073,14 @@
     renderizarProductos();
     updateCart();
   });
+
+  // Cerrar modal al hacer clic fuera del contenido
+  window.onclick = function(event) {
+    const modal = document.getElementById('productModal');
+    if (event.target === modal) {
+      closeModal();
+    }
+  }
 </script>
 
 </body>
