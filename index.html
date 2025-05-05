@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Shopify Panamá</title>
   <style>
-    
     body {
       font-family: Arial, sans-serif;
       background-color: #f4f4f4;
@@ -94,6 +93,32 @@
       color: white;
       padding: 1em;
       text-align: center;
+      position: relative;
+    }
+    .cart-icon-container {
+      display: inline-block;
+      position: relative;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+    .cart-icon {
+      font-size: 24px;
+      position: relative;
+    }
+    .cart-badge {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      background-color: #ff0000;
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
     }
     .search-bar {
       display: flex;
@@ -154,7 +179,9 @@
     .cart-item {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       padding: 0.5em 0;
+      border-bottom: 1px solid #eee;
     }
     .checkout {
       text-align: right;
@@ -172,7 +199,7 @@
       background-color: #218838;
     }
     #paypal-button {
-      background-color: #0070ba; /* Azul de PayPal */
+      background-color: #0070ba;
       color: white;
       padding: 10px;
       width: 100%;
@@ -191,6 +218,35 @@
       font-weight: bold;
       color: #232f3e;
       margin-top: 20px;
+    }
+    /* Nuevos estilos para el control de cantidad */
+    .quantity-control {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .quantity-btn {
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      border: 1px solid #ddd;
+      background: #f8f8f8;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .quantity-value {
+      min-width: 20px;
+      text-align: center;
+    }
+    .item-info {
+      flex: 1;
+    }
+    .item-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
   </style>
 </head>
@@ -230,7 +286,9 @@
 
 <div id="tienda">
   <button id="volver" onclick="cerrarTienda()">Volver al formulario</button>
-  <header><h1>Mini Tienda Online</h1></header>
+  <header>
+    <h1>Mini Tienda Online</h1>
+  </header>
 
   <div class="search-bar">
     <input type="text" id="buscarProducto" placeholder="Buscar productos..." oninput="filtrarProductos()">
@@ -244,6 +302,11 @@
     <h2>Carrito de Compras</h2>
     <div id="cart-items"></div>
     <div class="checkout">
+      <div class="cart-icon-container">
+        <div class="cart-icon">🛒
+          <span class="cart-badge" id="cart-badge">0</span>
+        </div>
+      </div>
       <strong>Total: $<span id="total">0.00</span></strong><br>
       <button onclick="checkout()">Proceder al pago</button>
       <form action="https://www.paypal.com/cgi-bin/webscr" method="post" onsubmit="vaciarCarrito()">
@@ -258,13 +321,14 @@
 
 <script>
   const productos = [
-    { nombre: "Producto 0", precio: 19.99, imagen: "https://via.placeholder.com/200x150" },
+    { nombre: "Producto 0", precio: 19.99, imagen: "imagenes/producto0.jpg" },
     { nombre: "Producto 1", precio: 19.99, imagen: "https://via.placeholder.com/200x150" },
     { nombre: "Producto 2", precio: 29.99, imagen: "https://via.placeholder.com/200x150" },
     { nombre: "Producto 3", precio: 15.50, imagen: "https://via.placeholder.com/200x150" }
   ];
 
   let cart = JSON.parse(localStorage.getItem('cart')) || [];
+  let groupedCart = {};
 
   function formatPhone() {
     let input = document.getElementById("telefono");
@@ -297,6 +361,8 @@
 
     document.getElementById('formulario').style.display = 'none';
     document.getElementById('tienda').style.display = 'block';
+    renderizarProductos();
+    updateCart();
   }
 
   function cerrarTienda() {
@@ -329,20 +395,82 @@
   function updateCart() {
     const items = document.getElementById('cart-items');
     const total = document.getElementById('total');
+    const badge = document.getElementById('cart-badge');
+    
     items.innerHTML = '';
     let suma = 0;
-    cart.forEach((item, i) => {
-      suma += item.precio;
+    let totalItems = 0;
+    
+    // Agrupa productos iguales
+    groupedCart = {};
+    cart.forEach(item => {
+      if (!groupedCart[item.nombre]) {
+        groupedCart[item.nombre] = {
+          ...item,
+          cantidad: 1,
+          subtotal: item.precio
+        };
+      } else {
+        groupedCart[item.nombre].cantidad++;
+        groupedCart[item.nombre].subtotal += item.precio;
+      }
+    });
+    
+    // Renderiza los items agrupados
+    Object.values(groupedCart).forEach((item, i) => {
+      suma += item.subtotal;
+      totalItems += item.cantidad;
+      
       const div = document.createElement('div');
       div.className = 'cart-item';
-      div.innerHTML = `${item.nombre} - $${item.precio.toFixed(2)} <button onclick="removeItem(${i})">Eliminar</button>`;
+      div.innerHTML = `
+        <div class="item-info">
+          ${item.nombre} - $${item.precio.toFixed(2)} c/u
+        </div>
+        <div class="item-actions">
+          <div class="quantity-control">
+            <button class="quantity-btn" onclick="updateQuantity('${item.nombre}', -1)">-</button>
+            <span class="quantity-value">${item.cantidad}</span>
+            <button class="quantity-btn" onclick="updateQuantity('${item.nombre}', 1)">+</button>
+          </div>
+          <div>$${item.subtotal.toFixed(2)}</div>
+          <button onclick="removeAllItems('${item.nombre}')">Eliminar</button>
+        </div>
+      `;
       items.appendChild(div);
     });
+    
     total.textContent = suma.toFixed(2);
+    badge.textContent = totalItems;
+    badge.style.display = totalItems > 0 ? 'flex' : 'none';
   }
 
-  function removeItem(i) {
-    cart.splice(i, 1);
+  function updateQuantity(nombre, change) {
+    if (change === -1 && groupedCart[nombre].cantidad === 1) {
+      removeAllItems(nombre);
+      return;
+    }
+    
+    if (change === 1) {
+      // Añade uno más
+      const producto = productos.find(p => p.nombre === nombre);
+      if (producto) {
+        cart.push({ nombre: producto.nombre, precio: producto.precio });
+      }
+    } else {
+      // Elimina uno
+      const index = cart.findIndex(item => item.nombre === nombre);
+      if (index !== -1) {
+        cart.splice(index, 1);
+      }
+    }
+    
+    updateCart();
+    saveCart();
+  }
+
+  function removeAllItems(nombre) {
+    cart = cart.filter(item => item.nombre !== nombre);
     updateCart();
     saveCart();
   }
@@ -357,7 +485,7 @@
   }
 
   function vaciarCarrito() {
-    cart.length = 0;
+    cart = [];
     updateCart();
     saveCart();
   }
@@ -384,8 +512,11 @@
     });
   }
 
-  renderizarProductos();
-  updateCart();
+  // Inicializar la tienda al cargar la página
+  document.addEventListener('DOMContentLoaded', function() {
+    renderizarProductos();
+    updateCart();
+  });
 </script>
 
 </body>
